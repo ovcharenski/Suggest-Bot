@@ -10,7 +10,7 @@ chatID = -4766934090
 def main(message):
     bot.send_chat_action(message.chat.id, 'typing')
     bot.send_message(message.chat.id, f"<em><b>Привет @{message.from_user.username}!</b></em>", parse_mode='html')
-    bot.send_message(message.chat.id, f"<em><b>Предлагай свою песню!)</b></em>", parse_mode='html')
+    bot.send_message(message.chat.id, f"<em><b>Предлагай свою песню!)\n\nАвтор - Название</b></em>", parse_mode='html')
 
 
 @bot.message_handler(commands=['mg'])
