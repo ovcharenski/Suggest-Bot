@@ -58,7 +58,7 @@ def adduser(listname, username):
     try:
         with open(filename, 'a', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
-            writer.writerow([username, 0, 0])
+            writer.writerow([username, None, 0000000])
     except Exception as e:
         print(f"Ошибка при записи в файл: {e}")
 
@@ -101,19 +101,19 @@ def getinfo(message):
     if message.from_user.username in readcsv("admin"):
         if message.reply_to_message:
             original_message_user = message.reply_to_message.from_user
-            bot.send_message(message.chat.id, f"@{original_message_user.username}\n"
+            bot.reply_to(message, f"@{original_message_user.username}\n"
                                               f"{original_message_user.first_name}\n"
                                               f"ID: <code>{original_message_user.id}</code>", parse_mode='html')
         elif "@" in message.text:
             user = message.text.split()[1][1:]
             if user in readcsv("reg"):
-                bot.send_message(message.chat.id, f"@{user}\n"
+                bot.reply_to(message, f"@{user}\n"
                                                   f"{readcsv("reg")[user][0]}\n"
                                                   f"ID: <code>{readcsv("reg")[user][1]}</code>", parse_mode='html')
             else:
                 bot.reply_to(message, f"Error 101: UserNotFound")
         else:
-            bot.send_message(message.chat.id, f"@{message.from_user.username}\n"
+            bot.reply_to(message, f"@{message.from_user.username}\n"
                                               f"{message.from_user.first_name}\n"
                                               f"ID: <code>{message.from_user.id}</code>", parse_mode='html')
 
@@ -123,21 +123,22 @@ def getid(message):
     if message.from_user.username in readcsv("admin"):
         if message.reply_to_message:
             original_message = message.reply_to_message
-            bot.send_message(message.chat.id, f"ID: <code>{original_message.from_user.id}</code>", parse_mode='html')
+            bot.reply_to(message, f"ID: <code>{original_message.from_user.id}</code>", parse_mode='html')
         elif "@" in message.text:
             user = message.text.split()[1][1:]
             if user in readcsv("reg"):
-                bot.send_message(message.chat.id,f"ID: <code>{readcsv("reg")[user][1]}</code>", parse_mode='html')
+                bot.reply_to(message, f"ID: <code>{readcsv("reg")[user][1]}</code>", parse_mode='html')
             else:
                 bot.reply_to(message, f"Error 101: UserNotFound")
         else:
-            bot.send_message(message.chat.id, f"ID: <code>{message.from_user.id}</code>", parse_mode='html')
+            bot.reply_to(message, f"ID: <code>{message.from_user.id}</code>", parse_mode='html')
 
 
 @bot.message_handler(commands=['chat'])
 def chat(message):
     if message.from_user.username in readcsv("admin"):
-        bot.send_message(message.chat.id, message.chat.id)
+        bot.reply_to(message, f"CHAT ID: <code>{message.chat.id}</code>", parse_mode='html')
+        return
 
 
 @bot.message_handler(commands=['ban'])
@@ -145,7 +146,8 @@ def ban(message):
     if message.chat.id == adminChatId and "@" in message.text:
         user = message.text.split()[1][1:]
         adduser("banned", user)
-        bot.send_message(adminChatId, f"Вы успешно заблокировали пользователя!")
+        bot.reply_to(message, f"Вы успешно заблокировали пользователя!")
+        return
 
 
 @bot.message_handler(commands=['unban'])
@@ -154,9 +156,11 @@ def unban(message):
         user = message.text.split()[1][1:]
         if user in readcsv("banned"):
             deluser("banned", user)
-            bot.send_message(adminChatId, f"Вы успешно разблокировали пользователя!")
+            bot.reply_to(message, f"Вы успешно разблокировали пользователя!")
+            return
         else:
             bot.reply_to(message, f"Error 101: UserNotFound")
+            return
 
 
 @bot.message_handler(commands=['op'])
@@ -165,9 +169,11 @@ def op(message):
         if message.reply_to_message:
             original_message = message.reply_to_message
             changecsv("admin", original_message)
-            bot.send_message(adminChatId, f"Вы успешно повысили пользователя!")
+            bot.reply_to(message, f"Вы успешно повысили пользователя!")
+            return
         else:
             bot.reply_to(message, f"Error 101: UserNotFound")
+            return
 
 
 @bot.message_handler(commands=['unop'])
@@ -186,10 +192,11 @@ def unop(message):
                 user_id=user_to_kick[1]
             )
             deluser("admin", user)
-            bot.send_message(adminChatId, f"Вы успешно понизили пользователя!")
+            bot.reply_to(message, f"Вы успешно понизили пользователя!")
+            return
         else:
-            print(user)
             bot.reply_to(message, f"Error 101: UserNotFound")
+            return
 
 
 @bot.message_handler(commands=['banlist'])
@@ -198,7 +205,7 @@ def banlist(message):
         banned_users = readcsv("banned")
 
         if not banned_users:
-            bot.send_message(message.chat.id, "Список забаненных пуст")
+            bot.reply_to(message, "Список забаненных пуст")
             return
 
         # Формируем красивое сообщение
@@ -211,8 +218,8 @@ def banlist(message):
             )
 
         # Отправка с HTML-разметкой
-        bot.send_message(
-            chat_id=message.chat.id,
+        bot.reply_to(
+            message=message,
             text=message_text,
             parse_mode='HTML',
             disable_web_page_preview=True
@@ -225,7 +232,7 @@ def adminlist(message):
         admin_users = readcsv("admin")
 
         if not admin_users:
-            bot.send_message(message.chat.id, "Список забаненных пуст")
+            bot.reply_to(message, "Список админов пуст")
             return
 
         # Формируем красивое сообщение
@@ -238,12 +245,64 @@ def adminlist(message):
             )
 
         # Отправка с HTML-разметкой
-        bot.send_message(
-            chat_id=message.chat.id,
+        bot.reply_to(
+            message=message,
             text=message_text,
             parse_mode='HTML',
             disable_web_page_preview=True
         )
+
+
+@bot.message_handler(commands=['alarm'])
+def alarm(message):
+    if message.chat.id == adminChatId:
+        admin_users = readcsv("admin")
+
+        if not admin_users:
+            bot.reply_to(message, "Error 101: UserNotFound")
+            return
+
+        if not message.reply_to_message:
+            bot.reply_to(message, "Error 102: MessageNotFound")
+            return
+
+
+        # Формируем красивое сообщение
+        message_text = "🚨 <b>ALARM</b> 🚨\n\n"
+        for username in admin_users.keys():
+            message_text += f"@{username} "
+
+        # Отправка с HTML-разметкой
+        bot.reply_to(
+            message=message.reply_to_message,
+            text=message_text,
+            parse_mode='HTML',
+            disable_web_page_preview=True
+        )
+        return
+
+
+@bot.message_handler(commands=['announce'])
+def announce(message):
+    if message.chat.id == adminChatId:
+        reg_users = readcsv("reg")
+
+        if not reg_users:
+            bot.reply_to(message, "Error 101: UserNotFound")
+            return
+
+        text = message.text[9:]
+
+        if text == "":
+            bot.reply_to(message, "Error 103: TextNotFound")
+            return
+
+
+        # Формируем красивое сообщение
+        for user, userdata in reg_users.items():
+            bot.send_message(userdata[1], text)
+            bot.reply_to(message, f"Вы успешно отправили объявление!")
+        return
 
 
 @bot.message_handler()
