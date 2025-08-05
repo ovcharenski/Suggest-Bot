@@ -23,5 +23,5 @@
 | /banlist            | Get list of banned users        |
 | /adminlist          | Get list of admins              |
 | /alarm [with reply] | Alarm admins to message         |
-| /announce [text]    | Make an announce in bot         |
+| /announce [text]    | Make an announcement in bot     |
 
