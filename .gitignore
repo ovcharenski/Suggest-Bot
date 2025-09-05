@@ -1,10 +1,6 @@
+.idea/
+.venv/
+
 .env
-*.log
-*.pyc
-__pycache__/
-bot_config.json
-.venv
-.idea
-dist/
-build/
-*.spec
+data/
+logs/
