@@ -1,6 +1,6 @@
-# 🤖 Suggest Bot v3.1
+# 🤖 Suggest Bot v4.1
 
-Telegram bot for collecting user suggestions and feedback. Automatically forwards suggestions to a specified chat, supports multiple content formats, and includes a moderation system.
+Telegram bot for collecting user suggestions and feedback with tag-based categorization. Automatically forwards suggestions to a specified chat, supports multiple content formats, and includes a comprehensive moderation system.
 
 ---
 
@@ -11,7 +11,15 @@ Telegram bot for collecting user suggestions and feedback. Automatically forward
 * **Text suggestions** - any text messages
 * **Photos** - with or without captions
 * **Videos** - with or without captions
+* **Tag-based categorization** - organize suggestions by type
 * **Automatic forwarding** to target chat for moderation
+
+### 🏷️ Tag System
+
+* **Customizable tags** - predefined categories for suggestions
+* **Visual tag selection** - user-friendly keyboard interface
+* **Hashtag integration** - automatic hashtag assignment
+* **Flexible configuration** - easy tag management
 
 ### 👥 User Management
 
@@ -19,12 +27,13 @@ Telegram bot for collecting user suggestions and feedback. Automatically forward
 * **Role system** with access rights
 * **Ban and warning checks**
 * **User info** via /me command
+* **SQLite database** - efficient user data storage
 
 ### ⚙️ Administrative Functions
 
-* **Set welcome message** (/setmg)
+* **Role-based access control** - granular permissions
 * **Content moderation** - only allowed message types
-* **Logging of all actions**
+* **Logging of all actions** - comprehensive audit trail
 * **Flexible ban system** (temporary and permanent)
 
 ### 🛡️ Security
@@ -33,6 +42,7 @@ Telegram bot for collecting user suggestions and feedback. Automatically forward
 * **Content filtering** - only text, photo, and video
 * **Anti-spam protection** via warnings
 * **Access rights validation**
+* **SQL injection protection** - parameterized queries
 
 ---
 
@@ -67,7 +77,6 @@ SGS_CHAT_ID=chat_id_for_suggestions
 DATA_DIR=data                    # Directory for data
 LOGS_DIR=logs                    # Directory for logs
 MAX_WARN=3                       # Maximum number of warnings
-SUPER_OPERATOR=username          # Super-operator of the system
 ```
 
 4. Run the bot:
@@ -93,72 +102,76 @@ pyinstaller --onefile --add-data ".env;." --additional-hooks-dir=. sgs-bot.py
 * **`/start`** - registration and welcome message
 * **`/me`** - information about your account
 * **`/help`** - help with using the bot
-* **`/setmg [text]`** - set welcome message (admins only)
-* **`/chatid`** - get chat id
 
 ### Sending Suggestions
 
-Simply send the bot:
+1. Send your suggestion as:
+   * 📝 **Text message** - any suggestion or idea
+   * 📸 **Photo** - with or without caption
+   * 🎥 **Video** - with or without caption
 
-* 📝 **Text message** - any suggestion or idea
-* 📸 **Photo** - with or without caption
-* 🎥 **Video** - with or without caption
+2. **Select a tag** from the interactive keyboard
+3. **Confirm sending** with or without tag
 
-**Example:**
-
+**Example Flow:**
 ```
-User: Hi! I suggest adding a new feature...
-Bot: ✅ Your suggestion has been sent!
+User: Hi! I suggest adding dark mode...
+Bot: ✅ Содержание получено! Теперь выберите тег для вашего предложения:
+[💡 Идея] [🚀 Улучшение] [📤 Отправить без тега]
+
+User: 💡 Идея
+Bot: ✅ Ваше предложение отправлено с тегом Идея!
 ```
 
-### For Administrators
+### Tag System
 
-```
-Admin: /setmg Welcome! Send your suggestions and ideas.
-Bot: ✅ Welcome message updated!
-```
+* **Predefined categories**: Bug, Idea, Improvement, Documentation, Design
+* **Customizable**: Modify tags.json to add new categories
+* **Visual interface**: Easy selection via reply keyboard
 
 ---
 
 ## 🗃️ Data Structure
 
-### Configuration Files
+### Database Schema
 
 ```
 data/
-├── users.json        # User data
-├── banned.json       # Banned users
-├── admins.json       # Admins and operators
-├── bots_data.json    # Bot data (reserved)
-├── auth_codes.json   # Authorization codes (reserved)
-└── welcome_message.txt # Welcome message
+├── system.db           # SQLite database (users, bans, permissions)
+├── tags.json           # Tag definitions and hashtags
+└── welcome_message.txt # Welcome message (reserved)
 ```
 
-### File Formats
+### Database Tables
 
-**users.json**:
+**users table:**
+- username (TEXT PRIMARY KEY)
+- user_id (INTEGER)
+- first_name (TEXT)
+- rank (TEXT)
+- warns (INTEGER)
+- created_at (TIMESTAMP)
+- updated_at (TIMESTAMP)
 
+**bans table:**
+- username (TEXT PRIMARY KEY)
+- ban_time (INTEGER)  # hours, 0 = permanent
+- banned_at (INTEGER) # timestamp
+- reason (TEXT)
+
+**operators/global_admins tables:**
+- username (TEXT PRIMARY KEY)
+
+### Tags Configuration
+
+**tags.json:**
 ```json
 {
-  "username": {
-    "id": 123456789,
-    "first_name": "User Name",
-    "rank": "user",
-    "banned": false,
-    "warns": 0
-  }
-}
-```
-
-**banned.json**:
-
-```json
-{
-  "username": {
-    "ban_time": 24,
-    "banned_at": 1672531200,
-    "reason": "spam"
-  }
+  "🐛 Баг": "#баг",
+  "💡 Идея": "#идея", 
+  "🚀 Улучшение": "#улучшение",
+  "📝 Документация": "#документация",
+  "🎨 Дизайн": "#дизайн"
 }
 ```
 
@@ -169,7 +182,7 @@ data/
 ### 🎯 Access Levels
 
 * **👤 User** - can send suggestions
-* **🪛 Local Administrator** - basic moderation rights
+* **🪛 Local Administrator** - basic moderation rights  
 * **🔧 Global Administrator** - extended management rights
 * **⚡ Operator** - full system control
 
@@ -180,8 +193,6 @@ data/
 | `/start`  | ✅    | ✅           | ✅            | ✅        |
 | `/me`     | ✅    | ✅           | ✅            | ✅        |
 | `/help`   | ✅    | ✅           | ✅            | ✅        |
-| `/setmg`  | ❌    | ❌           | ✅            | ✅        |
-| `/chatid` | ❌    | ❌           | ✅            | ✅        |
 
 ---
 
@@ -190,15 +201,15 @@ data/
 The bot keeps detailed logs of all actions:
 
 * `logs/sgs-bot.log` - main bot logs
-* Registration of all incoming suggestions
+* Registration of all incoming suggestions with tags
 * Tracking admin actions
 * System errors and warnings
+* Suggestion forwarding status
 
 **Example log:**
-
 ```
-2024-01-15 10:30:00 - sgs-bot - INFO - Suggestion from @username forwarded to chat 12345
-2024-01-15 10:31:00 - sgs-bot - INFO - Welcome message updated by admin_user
+2024-01-15 10:30:00 - sgs-bot - INFO - Suggestion from @username forwarded to chat 12345 with tag Идея
+2024-01-15 10:31:00 - sgs-bot - INFO - New user registered: username
 ```
 
 ---
@@ -208,7 +219,7 @@ The bot keeps detailed logs of all actions:
 ### 📵 Unsupported Content Types
 
 * ❌ Documents (files)
-* ❌ Audio messages
+* ❌ Audio messages  
 * ❌ Voice messages
 * ❌ Stickers
 * ❌ Locations
@@ -218,15 +229,16 @@ The bot keeps detailed logs of all actions:
 
 * ✅ Username required
 * ✅ Registration via /start
-* ✅ No bans
+* ✅ No active bans
 
 ---
 
 ## 🚀 Performance
 
 * **Asynchronous message processing**
-* **Optimized data storage**
+* **SQLite database** - optimized data storage
 * **Automatic directory creation**
+* **Background cleanup** of expired suggestions
 * **Minimal system load**
 
 ---
@@ -238,10 +250,17 @@ If you encounter issues:
 1. **Check .env settings** - token and chat ID
 2. **Ensure access rights** to directories
 3. **Check logs** in `logs/sgs-bot.log`
-4. **Ensure** the bot is added to the target chat with admin rights
+4. **Verify database integrity** in `data/system.db`
+5. **Ensure** the bot is added to the target chat with admin rights
 
 **Important:** The bot must have permission to send messages in the target chat!
 
+### Common Issues
+
+* **"User not registered"** - Use `/start` command first
+* **"Username required"** - Set username in Telegram settings
+* **Tag selection not appearing** - Check `tags.json` file exists and is valid JSON
+
 ---
 
-**Version:** 3.1
+**Version:** 4.1 
