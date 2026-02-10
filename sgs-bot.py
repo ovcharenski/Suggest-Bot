@@ -2,9 +2,6 @@ import telebot
 from telebot.types import Message
 import time
 import threading
-from datetime import datetime
-
-# Импорт наших модулей
 from config import Config
 from database_manager import DatabaseManager
 from utils import TagManager, UserValidator, SuggestionBuilder, MessageFormatter
@@ -115,7 +112,7 @@ class SuggestBot:
         
         logger.info(f"Start command from {message.from_user.username} in chat {message.chat.id}")
         
-        username = message.from_user.username.lower()
+        username = message.from_user.username
         user_id = message.from_user.id
         first_name = message.from_user.first_name
         
@@ -174,11 +171,7 @@ class SuggestBot:
         if not is_valid:
             self.bot.reply_to(message, error_msg)
             return
-        
-        # Проверка бана
-        if self.db.is_user_banned(message.from_user.id):
-            self.bot.reply_to(message, "❌ Вы забанены и не можете использовать бота.")
-            return
+
         
         logger.info(f"Me command from {message.from_user.username}")
         
@@ -187,7 +180,7 @@ class SuggestBot:
         
         if user_data:
             response = self.formatter.format_user_info(user_data)
-            self.bot.reply_to(message, response)
+            self.bot.reply_to(message, response, parse_mode='HTML')
         else:
             self.bot.reply_to(message, "❌ Пользователь не найден. Используйте /start для регистрации.")
     
@@ -201,12 +194,7 @@ class SuggestBot:
         if not is_valid:
             self.bot.reply_to(message, error_msg)
             return
-        
-        # Проверка бана
-        if self.db.is_user_banned(message.from_user.id):
-            self.bot.reply_to(message, "❌ Вы забанены и не можете использовать бота.")
-            return
-        
+
         logger.info(f"Help command from {message.from_user.username}")
         
         help_text = (

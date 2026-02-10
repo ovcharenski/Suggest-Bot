@@ -159,17 +159,15 @@ class MessageFormatter:
         rank_text = Config.RANK_TEXTS.get(rank, '👤 Пользователь')
         banned = "❌ Забанен" if user_data.get('banned') else "✅ Активен"
         warns = user_data.get('warns', 0)
+
+        response = (f"👤 Информация о пользователе\n\n"
+                    f"📧 Username: @{username}\n"
+                    f"👨‍💼 Ранг: {rank_text}\n"
+                    f"🆔 ID: <code>{user_id}</code>\n"
+                    f"📛 Имя: {first_name}")
+        if rank not in ['gadmin', 'operator']:
+            response += (
+                f"\n📊 Ограничения: {banned}\n"
+                f"💢 Предупреждения: {warns}/{Config.MAX_WARN}")
         
-        text = (
-            f"👤 Информация о пользователе\n\n"
-            f"📧 Username: @{username}\n"
-            f"👨‍💼 Ранг: {rank_text}\n"
-            f"🆔 ID: {user_id}\n"
-            f"📛 Имя: {first_name}\n"
-            f"📊 Статус: {banned}"
-        )
-        
-        if rank == 'user':
-            text += f"\n💢 Предупреждения: {warns}/{Config.MAX_WARN}"
-        
-        return text
+        return response

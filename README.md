@@ -1,4 +1,4 @@
-# 🤖 Suggest Bot v5.1
+# 🤖 Suggest Bot v5.1.1
 
 Telegram bot for collecting user suggestions and feedback with tag-based categorization. Automatically forwards suggestions to a specified chat, supports multiple content formats, and includes a comprehensive moderation system with API integration.
 
@@ -83,13 +83,13 @@ DEFAULT_BAN_TIME=24
 
 5. Run the bot:
 ```bash
-python bot_core.py
+python sgs-bot.py
 ```
 
 ### Project Structure
 ```
 sgs-bot/
-├── bot_core.py           # Main bot module
+├── sgs-bot.py           # Main bot module
 ├── database_manager.py   # API integration and database operations
 ├── utils.py              # Utilities (tags, validators, formatters)
 ├── config.py             # Configuration management
@@ -243,4 +243,4 @@ If you encounter issues:
 
 ---
 
-**Version:** 5.1 
+**Version:** 5.1.1
